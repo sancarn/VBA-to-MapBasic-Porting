@@ -4,9 +4,14 @@ Porting VBA routines to MapBasic
 
 ## Basic Porting Routine:
 
-Replace "Integer" with "SmallInt"
+RegexReplace "\bInteger\b" with "SmallInt"
 
-Replace "Long" with "Integer"
+RegexReplace "\bLong\b" with "Integer"
 
-Replace "Boolean" with "Logical"
+RegexReplace "\bBoolean\b" with "Logical"
 
+RegexReplace "\bMid(" with "Mid$("
+
+RegexReplace "\bLeft(" with "Left$("
+
+RegexReplace "\bRight(" with "Right$("
