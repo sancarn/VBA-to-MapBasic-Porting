@@ -31,9 +31,8 @@ ByVal uExitCode As Long) As Long
 Declare Function CloseHandle Lib "kernel32.dll" (ByVal hObject As Long) As Long
 
 Function RunningProcess(NameProcess As String) As Boolean
-    'E.G. NameProcess = "Quick Access Toolkit.exe"
+                    'E.G. NameProcess = "explorer.exe"
     
-    Const PROCESS_ALL_ACCESS = &H1F0FFF
     Const TH32CS_SNAPPROCESS As Long = 2&
     Dim uProcess  As PROCESSENTRY32
     Dim RProcessFound As Long
