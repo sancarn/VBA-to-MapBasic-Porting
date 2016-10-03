@@ -35,11 +35,7 @@ Declare Function RunningProcess(ByVal NameProcess As String) As Logical
 Print RunningProcess("explorer.exe")
 
 Function RunningProcess(ByVal NameProcess As String) As Logical
-    'E.G. NameProcess = "Quick Access Toolkit.exe"
-    
-    'Define PROCESS_ALL_ACCESS 2035711 
-    'Dim PROCESS_ALL_ACCESS As smallint
-    'PROCESS_ALL_ACCESS = 2035711
+    'E.G. NameProcess = "explorer.exe"
     
     Dim TH32CS_SNAPPROCESS as Integer
     TH32CS_SNAPPROCESS = 2
