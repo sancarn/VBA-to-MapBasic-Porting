@@ -20,7 +20,7 @@
  Private Declare Function lstrlenW Lib "kernel32.dll" (ByVal lpString As Integer) As Integer
 
 'API Constants
- Private Const NERR_Success As Integer = 0&
+ Private Const NERR_Success As Integer = 0
 
 Private Function PtrToString(lpwString As Integer) As String
      'Convert a LPWSTR pointer to a VB string
