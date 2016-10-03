@@ -11,5 +11,7 @@ RegexReplace "\bBoolean\b" with "Logical"
 RegexReplace "\bMid(" with "Mid$("
 RegexReplace "\bLeft(" with "Left$("
 RegexReplace "\bRight(" with "Right$("
+RegexReplace "\bvbNullChar\b" with "chr$(0)"
+RegexReplace "\bchr(" with "chr$("
 ... TBC
 ```
