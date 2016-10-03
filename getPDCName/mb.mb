@@ -1,0 +1,79 @@
+
+'Author  
+' Andrea Tincani 
+
+'Language  
+' VB5, VB6 
+
+'Operating Systems  
+' Windows NT +
+
+'http://www.andreavb.com/
+
+'The NetGetDCName function returns the name of the Primary Domain Controller (PDC) for the specified domain.
+
+'API calls
+ Private Declare Function NetGetDCName Lib "netapi32.dll" (ServerName As This, DomainName As This, lpBuffer As Integer) As Integer
+ Private Declare Function NetApiBufferFree Lib "netapi32.dll" (ByVal pBuffer As Integer) As Integer
+
+ Private Declare Sub CopyMem Lib "kernel32.dll" Alias "RtlMoveMemory" (pTo As This, uFrom As This, ByVal lSize As Integer)
+ Private Declare Function lstrlenW Lib "kernel32.dll" (ByVal lpString As Integer) As Integer
+
+'API Constants
+ Private Const NERR_Success As Integer = 0&
+
+Private Function PtrToString(lpwString As Integer) As String
+     'Convert a LPWSTR pointer to a VB string
+     Dim Buffer() As Byte
+     Dim nLen As Integer
+
+     If lpwString Then
+         nLen = lstrlenW(lpwString) * 2
+         If nLen Then
+             ReDim Buffer(0 To (nLen - 1)) As Byte
+             CopyMem Buffer(0), ByVal lpwString, nLen
+             PtrToString = Buffer
+         End If
+     End If
+ End Function
+
+'ComputerName
+
+ 'Pointer to  string containing the name of the remote server on which the function is to execute. A NULL string specifies the local computer.
+
+ 'DomainnNme
+
+ 'Pointer to a string containing the name of the domain. A NULL string indicates that the function returns the name of the domain controller for the primary domain.
+ Public Function GetPDCName(ComputerName As String, DomainName As String) As String
+     Dim bComputer() As Byte
+     Dim bDomain() As Byte
+     Dim ret As Integer
+     Dim lpBuffer As Integer
+     Dim s As String
+    
+     If Trim(ComputerName) = "" Then
+         'Local users
+         bComputer = Chr(0)
+     Else
+         'Check the syntax of the ServerName string
+         If InStr(ComputerName, "\\") = 1 Then
+             bComputer = ComputerName & Chr(0)
+         Else
+             bComputer = "\\" & ComputerName & Chr(0)
+         End If
+     End If
+     If Trim(DomainName) = "" Then
+         'Default Domain
+         bDomain = Chr(0)
+     Else
+         bDomain = DomainName & Chr(0)
+     End If
+     ret = NetGetDCName(bComputer(0), bDomain(0), lpBuffer)
+     If ret = NERR_Success And lpBuffer Then
+         s = PtrToString(lpBuffer)
+     End If
+     If lpBuffer Then
+         Call NetApiBufferFree(lpBuffer)
+     End If
+     GetPDCName = s
+ End Function
