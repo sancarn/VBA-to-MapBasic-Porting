@@ -1,3 +1,7 @@
+'References:
+'@Ref1 Use of IntPtr @ https://groups.google.com/d/msg/mapinfo-l/KSi87bgujYY/H-7GwRyeAQAJ
+'@Ref2 Stop using chr$(0) @ https://groups.google.com/d/msg/mapinfo-l/KSi87bgujYY/HS2FQRiwAQAJ
+
 'C# Type Defs:
 'From https://msdn.microsoft.com/en-us/library/cc230394.aspx
 'Long = 32-Bit Signed Integer
@@ -35,6 +39,7 @@ End Type
 
 '-------------------------------------------------------
 
+' @Ref1
 'BOOL WINAPI Process32First( _In_ HANDLE hSnapshot, _Inout_ LPProcessEntry32 lppe);
 Declare Function ProcessFirst Lib "kernel32.dll" Alias "Process32First" (ByVal hSnapshot As IntPtr, uProcess As PROCESSENTRY32) As Logical
 
@@ -78,26 +83,28 @@ Function RunningProcess(ByVal NameProcess As String) As Logical
            'uProcess is the process variable type
            RProcessFound = ProcessFirst(hSnapshot, uProcess)
            Print RProcessFound
-	   
+           			 
            Do
 				'DEBUG:
 				print uProcess.szexeFile
 				
              'find character(0) in returned process executable
-             i = InStr(1, uProcess.szexeFile, Chr$(0))
+             'i = InStr(1, uProcess.szexeFile, Chr$(0))
              
              'Trim to get process name
-             SzExename = LCase$(Left$(uProcess.szexeFile, i - 1))
-             
-             'Get path of "WINDOWS" folder i.e. "C:\WINDOWS"
-             WinDirEnv = GetFolderPath$(36) + "\"
-             WinDirEnv = LCase$(WinDirEnv)
+             'SzExename = LCase$(Left$(uProcess.szexeFile, i - 1))
              
              'if name of process = szexeFile of uProcess then the process is running
-             If Right$(SzExename, Len(NameProcess)) = LCase$(NameProcess) Then
-                RunningProcess = True
-                Exit Function
-             End If
+             'If Right$(SzExename, Len(NameProcess)) = LCase$(NameProcess) Then
+             '   RunningProcess = True
+             '   Exit Function
+             'End If
+             
+	     '@Ref2
+             If lCase$(uProcess.szexeFile) = LCase$(NameProcess) then
+                 RunningProcess = True
+                 Exit Function
+             End if
              
              'Get the next process off the heap - Similar as before
              RProcessFound = ProcessNext(hSnapshot, uProcess)
