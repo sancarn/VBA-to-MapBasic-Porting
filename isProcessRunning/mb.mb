@@ -1,8 +1,30 @@
+'C# Type Defs:
+'From https://msdn.microsoft.com/en-us/library/cc230394.aspx
+'Long = 32-Bit Signed Integer
+'DWORD = 32-Bit unsigned integer
+'ULong_Ptr = Unsigned long for pointers.
+'TCHAR = 16-Bit Unicode Character
+
+
+
+'typedef struct tagPROCESSENTRY32 {
+'  DWORD     dwSize;
+'  DWORD     cntUsage;
+'  DWORD     th32ProcessID;
+'  ULONG_PTR th32DefaultHeapID;
+'  DWORD     th32ModuleID;
+'  DWORD     cntThreads;
+'  DWORD     th32ParentProcessID;
+'  LONG      pcPriClassBase;
+'  DWORD     dwFlags;
+'  TCHAR     szExeFile[MAX_PATH];		'	MAX_PATH = 260; An array of 260 TCHARS - A short string
+'} PROCESSENTRY32, *PPROCESSENTRY32;
+
 Type PROCESSENTRY32
     dwSize As Integer
     cntUsage As Integer
     th32ProcessID As Integer
-    th32DefaultHeapID As Integer
+    th32DefaultHeapID As IntPtr
     th32ModuleID As Integer
     cntThreads As Integer
     th32ParentProcessID As Integer
@@ -13,23 +35,19 @@ End Type
 
 '-------------------------------------------------------
 
-Declare Function OpenProcess Lib "kernel32.dll" (ByVal dwDesiredAccess As Integer, 
-ByVal blnheritHandle As Integer, ByVal dwAppProcessId As Integer) As Integer
+'BOOL WINAPI Process32First( _In_ HANDLE hSnapshot, _Inout_ LPProcessEntry32 lppe);
+Declare Function ProcessFirst Lib "kernel32.dll" Alias "Process32First" (ByVal hSnapshot As IntPtr, uProcess As PROCESSENTRY32) As Logical
 
-Declare Function ProcessFirst Lib "kernel32.dll" Alias "Process32First" (ByVal hSnapshot As Integer, 
-uProcess As PROCESSENTRY32) As Integer
+'BOOL WINAPI Process32Next(_In_ HANDLE hSnapshot, _Out_ LPPROCESSENTRY32 lppe);
+Declare Function ProcessNext Lib "kernel32.dll" Alias "Process32Next" (ByVal hSnapshot As IntPtr, uProcess As PROCESSENTRY32) As Logical
 
-Declare Function ProcessNext Lib "kernel32.dll" Alias "Process32Next" (ByVal hSnapshot As Integer, 
-uProcess As PROCESSENTRY32) As Integer
+'HANDLE WINAPI CreateToolhelp32Snapshot(_In_ DWORD dwFlags, _In_ DWORD th32ProcessID); HANDLE == 'IntPtr'; DWORD == 'Integer'
+Declare Function CreateToolhelpSnapshot Lib "kernel32.dll" Alias "CreateToolhelp32Snapshot" ( ByVal lFlags As Integer, byval lProcessID As Integer) As IntPtr
 
-Declare Function CreateToolhelpSnapshot Lib "kernel32.dll" Alias "CreateToolhelp32Snapshot" ( 
-ByVal lFlags As Integer, byval lProcessID As Integer) As Integer
+'BOOL WINAPI CloseHandle(_In_ HANDLE hObject);
+Declare Function CloseHandle Lib "kernel32.dll" (ByVal hObject As IntPtr) As Integer
 
-Declare Function TerminateProcess Lib "kernel32.dll" (ByVal ApphProcess As Integer, 
-ByVal uExitCode As Integer) As Integer
-
-Declare Function CloseHandle Lib "kernel32.dll" (ByVal hObject As Integer) As Integer
-
+'User defined function
 Declare Function RunningProcess(ByVal NameProcess As String) As Logical
 
 Print RunningProcess("explorer.exe")
@@ -37,43 +55,38 @@ Print RunningProcess("explorer.exe")
 Function RunningProcess(ByVal NameProcess As String) As Logical
     'E.G. NameProcess = "explorer.exe"
     
-    Dim TH32CS_SNAPPROCESS as Integer
-    TH32CS_SNAPPROCESS = 2
+    Define TH32CS_SNAPPROCESS 2
     
-    Dim uProcess  As PROCESSENTRY32
-    Dim RProcessFound As Integer
-    Dim hSnapshot As Integer
+    Dim uProcess As PROCESSENTRY32
+    Dim RProcessFound As Logical
+    Dim hSnapshot As IntPtr
     Dim SzExename As String
-    Dim ExitCode As Integer
-    Dim MyProcess As Integer
-    Dim AppKill As Logical
-    Dim AppCount As SmallInt
     Dim i As SmallInt
     Dim WinDirEnv As String
          
         If NameProcess <> "" Then
-           AppCount = 0
-
            uProcess.dwSize = 296
            
            'Takes a snapshot of the specified processes, as well as the heaps, modules, and threads used by these processes
            'https://msdn.microsoft.com/en-us/library/windows/desktop/ms682489(v=vs.85).aspx
            hSnapshot = CreateToolhelpSnapshot(TH32CS_SNAPPROCESS, 0)
+           Print hSnapshot
            
            'Get the first process off the heap
            'RProcessFound is simply a Logical - 'Was a process found?'
            'hSnapshot is the handle to the heap
            'uProcess is the process variable type
            RProcessFound = ProcessFirst(hSnapshot, uProcess)
-              
+			 
            Do
+				'DEBUG:
+				print uProcess.szexeFile
+				
              'find character(0) in returned process executable
              i = InStr(1, uProcess.szexeFile, Chr$(0))
              
              'Trim to get process name
              SzExename = LCase$(Left$(uProcess.szexeFile, i - 1))
-             
-             print uProcess.szexeFile
              
              'Get path of "WINDOWS" folder i.e. "C:\WINDOWS"
              WinDirEnv = GetFolderPath$(36) + "\"
@@ -92,7 +105,7 @@ Function RunningProcess(ByVal NameProcess As String) As Logical
            Loop While RProcessFound
            
            'Close handle to the heap
-           Dim fin as integer
+           Dim fin as Logical
            Fin = CloseHandle(hSnapshot)
         End If
 End Function
