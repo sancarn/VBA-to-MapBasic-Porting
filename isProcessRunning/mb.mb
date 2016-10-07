@@ -77,7 +77,8 @@ Function RunningProcess(ByVal NameProcess As String) As Logical
            'hSnapshot is the handle to the heap
            'uProcess is the process variable type
            RProcessFound = ProcessFirst(hSnapshot, uProcess)
-			 
+           Print RProcessFound
+	   
            Do
 				'DEBUG:
 				print uProcess.szexeFile
